@@ -26,6 +26,9 @@ scriptencoding utf-8
   let g:enableUndo = 1
 "}
 
+" 是否为 GUi VIM
+let g:gui_running = has('gui_running')
+
 set nocompatible          " 关掉兼容模式: 避免 vi 下的一些功能操作
 set modeline              " 启用 modeline
 
@@ -210,7 +213,7 @@ set cpo&vim
 		set viminfo+=!                  " Viminfo include !
   "}
 
-	if has('gui_running')
+	if g:gui_running
 		set guioptions-=r        " Hide the right scrollbar
 		set guioptions-=L        " Hide the left scrollbar
 		set guioptions-=T
@@ -272,9 +275,9 @@ function! s:statusline_hi()
     hi User9 cterm=None ctermfg=249 ctermbg=241 gui=None guifg=#b2b2b2 guibg=#606060
 endfunction
 
-" call s:statusline_hi()
+call s:statusline_hi()
 " Refer to http://vim.wikia.com/wiki/Show_tab_number_in_your_tab_line
-if has('gui_running')
+if g:gui_running
     set guioptions-=e
 endif
 
