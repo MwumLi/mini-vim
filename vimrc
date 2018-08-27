@@ -689,6 +689,11 @@ if !exists('g:colors_name')
   " set background=dark
 
 " } // end space-vim-dark
+
+  " 注释以斜体显示: 需要终端支持
+  if &term == "xterm-256color"
+    hi Comment cterm=italic
+  endif
 endif
 
 function! s:statusline_hi()
