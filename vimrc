@@ -760,6 +760,7 @@ endif
   function! ExtractGitDir(path) abort
     if a:path == '' || a:path == '/' | return '' | endif
     let l:path = a:path
+    if !isdirectory(a:path) | let l:path = fnamemodify(l:path, ':h') | endif
     while l:path !=# '/'
       let dir = substitute(l:path, '[\/]$', '', '') . '/.git'
       if IsGitDir(dir)
@@ -779,9 +780,10 @@ endif
   function! s:SetGitStatus(root, str)
     let buf_list = filter(range(1, bufnr('$')), 'bufexists(v:val)')
     for nr in buf_list
-      let path = fnamemodify(bufname(nr), ':p')
+      let path = fnamemodify(resolve(bufname(nr)), ':p')
       if match(path, a:root) >= 0
-        call setbufvar(nr, 'eleline_branch', a:str)
+        call setbufvar(nr, 's_branch', a:str)
+        break
       endif
     endfor
     redraws!
@@ -798,7 +800,6 @@ endif
     let l:job_id = matchstr(string(a:job), '\d\+')
     if !has_key(g:jobs, l:job_id) | return | endif
     call remove(g:jobs, l:job_id)
-    echom 'Job'.l:job_id.'remmoved'
   endfunction
 
   function! s:JobHandler(job_id, data, event) dict abort
@@ -815,20 +816,19 @@ endif
     call remove(g:jobs, a:job_id)
   endfunction
 
-  " Reference: https://github.com/chemzqm/vimrc/blob/master/statusline.vim
-  function! S_fugitive(...) abort
+  function! S_branch(...) abort
     if s:is_tmp_file() | return '' | endif
     let reload = get(a:, 1, 0) == 1
-    if exists('b:eleline_branch') && !reload | return b:eleline_branch | endif
+    if exists('b:s_branch') && !reload | return b:s_branch | endif
     if !exists('*ExtractGitDir') | return '' | endif
     let roots = values(g:jobs)
     let dir = ExtractGitDir(resolve(expand('%:p')))
     if empty(dir) | return '' | endif
     let b:git_dir = dir
-    let root = fnamemodify(dir, ':h')
-    if index(roots, root) >= 0 | return '1' | endif
+    let root = dir
+    if index(roots, root) >= 0 | return '' | endif
 
-    let argv = add(has('win32') ? ['cmd', '/c']: ['bash', '-c'], 'git branch')
+    let argv = add(has('win32') ? ['cmd', '/c']: ['bash', '-c'], 'cd '.root.';git branch')
     if exists('*job_start')
       let job = job_start(argv, {'out_io': 'pipe', 'err_io':'null', 'out_cb': function('s:branch'), 'exit_cb': 'BranchExit'})
       if job_status(job) == 'fail' | return '' | endif
@@ -870,22 +870,18 @@ endif
     let l:buf_num = '%1* '.(has('gui_running')?'%n':'%{S_buf_num()}')." ❖ %*"
     let l:paste = "%#paste#%{&paste?'PASTE ':''}%*"
     let l:fp = '%4* %{S_full_path()} %*'
-    let l:branch = '%6*%{S_fugitive()}%*'
+    let l:branch = '%6*%{S_branch()}%*'
     let l:gutter = '%{S_git()}'
     let l:ale_e = '%#ale_error#%{S_ale_error()}%*'
     let l:ale_w = '%#ale_warning#%{S_ale_warning()}%*'
-    if get(g:, 'eleline_slim', 0)
-      return l:buf_num.l:paste.l:fp.'%<'.l:branch.l:gutter.l:ale_e.l:ale_w
-    endif
 
     let l:fs = '%3* %{S_file_size(@%)} %*'
     let l:m_r_f = '%7* %m%r%y %*'
-    let l:pos = '%8* '.(s:font?"\ue0a1":'').'%l/%L:%c%V |'
-    let l:enc = " %{''.(&fenc!=''?&fenc:&enc).''} | %{(&bomb?\",BOM \":\"\")}"
-    let l:ff = '%{&ff} %*'
-    let l:pct = '%9* %P %*'
+    let l:enc = " %{''.(&fenc!=''?&fenc:&enc).''}"."%{(&bomb?'[BOM]':'')}"."%{'['.&ff.']'} %*"
+    let l:pct = "%9* %P %*"
+    let l:pos = '%8* '.(s:font?"\ue0a1":'').'%l/%L:%c '
     return l:buf_num.l:paste.'%<'.l:fs.l:fp.l:branch.l:gutter.l:ale_e.l:ale_w
-          \ .'%='.l:m_r_f.l:pos.l:enc.l:ff.l:pct
+          \ .'%='.l:m_r_f.l:enc.l:pct.l:pos
   endfunction
 
   let s:colors = {
@@ -961,7 +957,7 @@ endif
   " current window and buffer, while %{} items are evaluated in the
   " context of the window that the statusline belongs to.
   function! s:SetStatusline(...) abort
-    call S_fugitive(1)
+    call S_branch(1)
     let &l:statusline = s:MyStatusLine()
     " User-defined highlightings shoule be put after colorscheme command.
     call s:hi_statusline()
@@ -973,7 +969,7 @@ endif
     call s:SetStatusline()
   endif
 
-  augroup eleline
+  augroup statusline
     autocmd!
     autocmd User GitGutter,Startified,LanguageClientStarted call s:SetStatusline()
     " Change colors for insert mode
