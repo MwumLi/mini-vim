@@ -713,7 +713,113 @@ function! s:statusline_hi()
     hi User9 cterm=None ctermfg=249 ctermbg=241 gui=None guifg=#b2b2b2 guibg=#606060
 endfunction
 
-" call s:statusline_hi()
+call s:statusline_hi()
+
+function! S_buf_num()
+    let l:circled_num_list = ['① ', '② ', '③ ', '④ ', '⑤ ', '⑥ ', '⑦ ', '⑧ ', '⑨ ', '⑩ ',
+                \             '⑪ ', '⑫ ', '⑬ ', '⑭ ', '⑮ ', '⑯ ', '⑰ ', '⑱ ', '⑲ ', '⑳ ']
+
+    return bufnr('%') > 20 ? bufnr('%') : l:circled_num_list[bufnr('%')-1]
+endfunction
+
+function! S_file_size(f)
+    let l:size = getfsize(expand(a:f))
+    if l:size == 0 || l:size == -1 || l:size == -2
+        return ''
+    endif
+    if l:size < 1024
+        return l:size.' bytes'
+    elseif l:size < 1024*1024
+        return printf('%.1f', l:size/1024.0).'k'
+    elseif l:size < 1024*1024*1024
+        return printf('%.1f', l:size/1024.0/1024.0) . 'm'
+    else
+        return printf('%.1f', l:size/1024.0/1024.0/1024.0) . 'g'
+    endif
+endfunction
+
+function! S_full_path()
+    if &filetype ==# 'startify'
+        return ''
+    else
+        return expand('%:p:t')
+    endif
+endfunction
+
+function! S_fugitive()
+    if !exists('g:loaded_fugitive')
+        return ''
+    endif
+    let l:head = fugitive#head()
+    return empty(l:head) ? '' : ' ⎇ '.l:head . ' '
+endfunction
+
+function! S_ale_error()
+    if !exists('g:loaded_ale')
+        return ''
+    endif
+    return !empty(ALEGetError())?ALEGetError():''
+endfunction
+
+function! S_ale_warning()
+    if !exists('g:loaded_ale')
+        return ''
+    endif
+    return !empty(ALEGetWarning())?ALEGetWarning():''
+endfunction
+
+let s:job_status = {}
+function! S_git_status()
+    if g:layervim_vim8
+        if !exists('g:loaded_fugitive')
+            return ''
+        endif
+        let l:roots = values(s:job_status)
+        let l:root = fugitive#head()
+        if index(roots, root) >= 0
+            return ''
+        endif
+        let job_id = jobstart(['git-status'], {
+            \ 'cwd': root,
+            \ 'on_stdout': function('s:JobHandler', [root]),
+            \ 'on_stderr': function('s:JobHandler', [root]),
+            \ 'on_exit': function('s:JobHandler', [root])
+            \})
+        if job_id == 0 || job_id == -1 | return '' | endif
+        let s:job_status[job_id] = root
+        return ''
+    endif
+endfunction
+
+function! MyStatusLine()
+  if g:gui_running
+    let l:buf_num = '%1* [B-%n] [W-%{winnr()}] %*'
+  else
+    let l:buf_num = '%1* %{S_buf_num()} ❖ %{winnr()} %*'
+  endif
+
+  let l:fs = '%3* %{S_file_size(@%)} %*'
+  let l:fp = '%4* %{S_full_path()} %*'
+  let l:git = '%6*%{S_fugitive()}%*'
+  let l:paste = "%#paste#%{&paste?'⎈ paste ':''}%*"
+  let l:ale_e = '%#ale_error#%{S_ale_error()}%*'
+  let l:ale_w = '%#ale_warning#%{S_ale_warning()}%*'
+
+  let l:m_r_f = '%7* %m%r%y %*'
+  let l:ff = '%8* %{&ff} |'
+  let l:enc = " %{''.(&fenc!=''?&fenc:&enc).''} | %{(&bomb?\",BOM\":\"\")}"
+  let l:pos = '%l:%c%V %*'
+  let l:pct = '%9* %P %*'
+
+
+  return l:buf_num.'%<'.l:fs.l:fp.l:git.l:paste.
+          \'%='.l:m_r_f.l:ff.l:enc.l:pos.l:pct
+endfunction
+" Note that the "%!" expression is evaluated in the context of the
+" current window and buffer, while %{} items are evaluated in the
+" context of the window that the statusline belongs to.
+set statusline=%!MyStatusLine()
+
 " Refer to http://vim.wikia.com/wiki/Show_tab_number_in_your_tab_line
 if g:gui_running
     set guioptions-=e
