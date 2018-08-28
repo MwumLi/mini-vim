@@ -34,7 +34,7 @@ let s:resolvePath = fnamemodify(s:resolvefile, ':p:h:s?/$??')
 let g:gui_running = has('gui_running')
 
 set nocompatible          " 关掉兼容模式: 避免 vi 下的一些功能操作
-set modeline              " 启用 modeline
+set nomodeline            " 禁用 modeline, 避免文本中出现的 vim 被认为是modeline
 
 " 避免续行效应
 let s:save_cpo = &cpo
