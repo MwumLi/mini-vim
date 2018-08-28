@@ -192,6 +192,15 @@ set cpo&vim
 	" undo - 无限回退 {
 		if exists('g:enableUndo') && g:enableUndo
 			if has('persistent_undo')
+        let s:undodir=$HOME.'/.vim/undodir'
+        if !isdirectory(s:undodir)
+          if exists("*mkdir")
+            call mkdir(s:undodir, 'p', 0755)
+          else
+            echom '[undo]: can not create dir "'.s:undodir.'" to store undo file, you need create it manually'
+          endif
+        endif
+
 				set undodir=~/.vim/undodir  " 指定撤销文件路径(默认撤销文件通常保存在文件本身相同的目录里)
 				set undofile                " Persistent undo
 				set undolevels=1000         " Maximum number of changes that can be undone
