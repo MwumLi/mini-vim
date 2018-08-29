@@ -716,7 +716,6 @@ if exists('g:enableStatusline') && g:enableStatusline
 " Custom Status Line {
   " Refer: https://github.com/liuchengxu/eleline.vim
 
-  let s:font = get(g:, 'eleline_powerline_fonts', get(g:, 'airline_powerline_fonts', 0))
   let g:jobs = {}
 
   function! S_buf_num()
@@ -804,7 +803,7 @@ if exists('g:enableStatusline') && g:enableStatusline
 
   function! s:branch(channel, message) abort
     if a:message =~ "^* "
-      let l:branch = substitute(a:message, '*', s:font ? " \ue0a0" : ' ⎇ ', '')
+      let l:branch = substitute(a:message, '*', ' ⎇ ', '')
       call s:SetGitStatus(s:cwd, l:branch.' ')
     endif
   endfunction
@@ -820,7 +819,7 @@ if exists('g:enableStatusline') && g:enableStatusline
     if v:dying | return | endif
     let l:cur_branch = join(filter(self.stdout, 'v:val =~ "*"'))
     if !empty(l:cur_branch)
-      let l:branch = substitute(l:cur_branch, '*', s:font ? " \ue0a0" : ' ⎇ ', '')
+      let l:branch = substitute(l:cur_branch, '*', ' ⎇ ', '')
       call s:SetGitStatus(self.cwd, l:branch.' ')
     else
       let errs = join(self.stderr)
@@ -859,7 +858,7 @@ if exists('g:enableStatusline') && g:enableStatusline
       let g:jobs[job_id] = root
     elseif exists('g:loaded_fugitive')
       let l:head = fugitive#head()
-      let l:symbol = s:font ? " \ue0a0 " : ' ⎇ '
+      let l:symbol = ' ⎇ '
       return empty(l:head) ? '' : l:symbol.l:head . ' '
     endif
 
@@ -892,7 +891,7 @@ if exists('g:enableStatusline') && g:enableStatusline
     let l:m_r_f = '%7* %m%r%y %*'
     let l:enc = " %{''.(&fenc!=''?&fenc:&enc).''}"."%{(&bomb?'[BOM]':'')}"."%{'['.&ff.']'} %*"
     let l:pct = "%9* %P %*"
-    let l:pos = '%8* '.(s:font?"\ue0a1":'').'%l/%L:%c '
+    let l:pos = '%8* %l/%L:%c '
     return l:buf_num.l:paste.'%<'.l:fs.l:fp.l:branch.l:gutter.l:ale_e.l:ale_w
           \ .'%='.l:m_r_f.l:enc.l:pct.l:pos
   endfunction
