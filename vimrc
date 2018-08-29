@@ -63,7 +63,8 @@ set cpo&vim
 
   " line number {
     set number              " 行号
-    set relativenumber      " Relative numbers on
+    " Relative numbers on
+    if exists('&relativenumber') | set relativenumber  | endif
   " }
 
   " cursor {
@@ -1011,12 +1012,14 @@ endfunction
 
 silent function! ToggleLineNumber()
   if &number
-    set nonumber            " 关闭号
-    set norelativenumber    " 关闭相对行号
+    set nonumber            " Line numbers off
+    " Relative numbers off
+    if exists('&relativenumber') | set norelativenumber  | endif
     echo "Hide Line Number"
   else
-    set number              " 行号
-    set relativenumber      " Relative numbers on
+    set number              " Line numbers on
+    " Relative numbers on
+    if exists('&relativenumber') | set relativenumber  | endif
     echo "Show Line Number"
   endif
 endfunction
