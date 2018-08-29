@@ -24,6 +24,9 @@ scriptencoding utf-8
   " 启用回退: 1 为 启用, 0 为禁用
   " 可视 Mode 下: u 为撤销, ctrl+r 为恢复
   let g:enableUndo = 1
+
+  " 增强状态栏: 1 为增强, 0 为默认
+  let g:enableStatusline = 1
 "}
 
 let s:expandfile = expand('%:r')
@@ -709,6 +712,7 @@ if !exists('g:colors_name')
   endif
 endif
 
+if exists('g:enableStatusline') && g:enableStatusline
 " Custom Status Line {
   " Refer: https://github.com/liuchengxu/eleline.vim
 
@@ -850,7 +854,7 @@ endif
         \ 'stdout_buffered': v:true,
         \ 'stderr_buffered': v:true,
         \ 'on_exit': function('s:JobHandler')
-        \})
+        \ })
       if job_id == 0 || job_id == -1 | return '' | endif
       let g:jobs[job_id] = root
     elseif exists('g:loaded_fugitive')
@@ -990,6 +994,7 @@ endif
   augroup END
 
 " }
+endif
 
 
 " Refer to http://vim.wikia.com/wiki/Show_tab_number_in_your_tab_line
