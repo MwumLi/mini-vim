@@ -8,8 +8,8 @@ scriptencoding utf-8
   " 文件类型插件的键映射前缀 <LocalLeader>
   let g:maplocalleader = ","
 
-	" 是否启用鼠标(鼠标滚动, 点击位置): 1 为启用 0 为禁用
-	let g:enableMouse = 1
+  " 是否启用鼠标(鼠标滚动, 点击位置): 1 为启用 0 为禁用
+  let g:enableMouse = 1
 
   " 当超出显示区域, 超出区域是否下一行显示, 1 为不折行, 0 为折行
   " let g:noWrapLine = 1
