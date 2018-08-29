@@ -112,7 +112,7 @@ set cpo&vim
 
   " list {
     set listchars=tab:▸\ ,trail:·,precedes:«,extends:»,eol:↵ 
-    set list
+    set nolist                " 隐藏不可见字符
   "}
 
   " fold {
