@@ -27,6 +27,10 @@ scriptencoding utf-8
 
   " 增强状态栏: 1 为增强, 0 为默认
   let g:enableStatusline = 1
+
+  " 增强斜体: 1 为增强, 0 为默认
+  " 需要终端支持, 终端若不支持并且显示异常, 那么注释此选项可恢复正常
+  " let g:enableItalic = 1
 "}
 
 let s:expandfile = expand('%:r')
@@ -275,8 +279,8 @@ augroup MINI_VIM_BASIC
 augroup END
 endif
 
-if !exists('g:colors_name')
 " space-vim-dark {
+if !exists('g:colors_name')
   " Vim color file
   "
   " Author: Liu-Cheng Xu
@@ -705,13 +709,20 @@ if !exists('g:colors_name')
   " 设置暗色调貌似会重置 Comment 的颜色
   " set background=dark
 
+endif
 " } // end space-vim-dark
 
-  " 注释以斜体显示: 需要终端支持
-  if &term == "xterm-256color"
-    hi Comment cterm=italic
-  endif
+
+" 斜体 {
+" 斜体需要终端支持, 如果不支持, 使用斜体部分可能显示异常
+" 禁用选项 g:enableItalic 让异常显示恢复正常
+if exists('g:enableItalic') && g:enableItalic
+  set t_ZH=[3m
+  set t_ZR=[23m
+  " 注释以斜体显示
+  hi Comment cterm=italic
 endif
+" }
 
 if exists('g:enableStatusline') && g:enableStatusline
 " Custom Status Line {
