@@ -1097,9 +1097,15 @@ endfunction
 
 	" move {
 		" jump to the start of line
+    " Normal Mode
 		nnoremap 1 0
+    " Visual Mode
+		vnoremap 1 0
 		" jump to the end of line
+    " Normal Mode
 		nnoremap 0 $
+    " Visual Mode
+		vnoremap 0 $
 		" jump to the start of line text
 		nnoremap H ^
 		" jump loop in Pairing characters , such '( ... )', '{  }'
