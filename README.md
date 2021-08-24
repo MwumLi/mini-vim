@@ -8,7 +8,7 @@
 
 使用 curl 安装:  
 
-	$ curl https://raw.githubusercontent.com/MwumLi/mini-vim/master/vimrc ~/.vimrc
+	$ curl https://raw.githubusercontent.com/MwumLi/mini-vim/master/vimrc > ~/.vimrc
 
 使用 wget 安装:  
 
